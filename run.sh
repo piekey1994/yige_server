@@ -1,0 +1,1 @@
+gunicorn -c gunicorn_app.py main:app
