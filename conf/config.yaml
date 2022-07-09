@@ -4,6 +4,6 @@ log:
 
 #服务端
 server:
-  port: 8888 #端口
+  port: 80 #端口
   num: 2 #服务端进程数
   access_log: false #是否开启服务端日志

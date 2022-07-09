@@ -1,1 +1,1 @@
-gunicorn -c gunicorn_app.py main:app
+gunicorn -c gunicorn_app.py --certfile=8087833_yige.foolai.top.pem --keyfile=8087833_yige.foolai.top.key main:app
