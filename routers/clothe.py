@@ -102,3 +102,210 @@ async def getRecommend(clotheid:str=Form(),filepath:str=Form()):
         i,j,k=ijk
         await ClotheModel.addRecommend(clotheid,i,j,k)
     return 'finish'
+
+
+@router.post('/weapp/clothe/clotheDetail')
+async def clotheDetail(clotheid:str=Form()):
+    clothedata = await ClotheModel.getclothe(clotheid)
+    recommendData = await ClotheModel.getRecommend(clotheid)
+    del clothedata['hog']
+    return {
+        'code':1,
+        'data':clothedata,
+        'recommendData':recommendData
+    }
+
+
+@router.post('/weapp/clothe/recommendDetail')
+async def recommendDetail(ri:str=Form(),rj:str=Form(),rk:str=Form(),openid:str=Form()):
+    myAllClothes = await ClotheModel.getAll(openid)
+    recommendArray = []
+    for new_type,ifs_dict in ifashion_pkl.items():
+        for (i,j,k),res_dict in ifs_dict.items():
+            if i==ri and j!=rj and k==rk:
+                tempFeatureArray=[]
+                for clothe in myAllClothes:
+                    rgb = np.array((clothe['r'],clothe['g'],clothe['b']))
+                    hog = np.frombuffer(clothe['hog'],dtype=np.float16)
+                    if new_type==clothe['clothetype'] and \
+                        np.sum(np.power((rgb-res_dict['rgb']),2))<3000:
+                        hog_dist =np.sum(np.power((hog-res_dict['hog']),2))
+                        if hog_dist<31:
+                            tempFeature={
+                                'cid':clothe['clotheid'],
+                                'img':clothe['clotheimg'],
+                                'distance':hog_dist
+                            }
+                            tempFeatureArray.append(tempFeature)
+                sort_tfa = sorted(tempFeatureArray,key=lambda x:x['distance'])
+                recommendArray.append(sort_tfa[:3])
+    if len(recommendArray)>0:
+        return {
+            'code':1,
+            'recommends':recommendArray
+        }
+    else:
+        return {
+            'code':0,
+            'error':'你衣服太少了'
+        }
+
+@router.post('/weapp/clothe/getMyLike')
+async def getMyLike(openid:str=Form()):
+    all = await ClotheModel.getMyLike(openid)
+    return {
+        'code':1,
+        'data':all,
+        'length':len(all)
+    }
+
+@router.post('/weapp/clothe/getAll')
+async def getAll(openid:str=Form()):
+    all = await ClotheModel.getAll2(openid)
+    return {
+        'code':1,
+        'data':all,
+        'length':len(all)
+    }
+
+@router.post('/weapp/clothe/setlocation')
+async def setlocation(clotheid:str=Form(),location:int=Form()):
+    await ClotheModel.setlocation(clotheid,location)
+    return 'true:1'
+
+@router.post('/weapp/clothe/setType')
+async def setType(clotheid:str=Form(),clothetype:int=Form()):
+    await ClotheModel.settype(clotheid,clothetype)
+    return 'true:1'
+
+@router.post('/weapp/clothe/setDetail')
+async def setDetail(clotheid:str=Form(),clothedetail:str=Form()):
+    await ClotheModel.setdetail(clotheid,clothedetail)
+    return 'true:1'
+
+@router.post('/weapp/clothe/setSeason')
+async def setSeason(clotheid:str=Form(),clotheseason:int=Form()):
+    await ClotheModel.setseason(clotheid,clotheseason)
+    return 'true:1'
+
+@router.post('/weapp/clothe/setColor')
+async def setColor(clotheid:str=Form(),clothecolor:int=Form()):
+    await ClotheModel.setcolor(clotheid,clothecolor)
+    return 'true:1'
+
+@router.post('/weapp/clothe/setStar')
+async def setStar(clotheid:str=Form(),clothestar:float=Form()):
+    await ClotheModel.setstar(clotheid,clothestar)
+    return 'true:1'
+
+
+@router.post('/weapp/clothe/delete')
+async def delete_clothe(openid:str=Form(),clotheid:str=Form()):
+    await ClotheModel.delete(openid,clotheid)
+    return 'true:1'
+
+@router.post('/weapp/clothe/getSeasonClothe')
+async def getSeasonClothe(openid:str=Form(),season:str=Form()):
+    if season=='春秋装':
+        seasonkey=0
+    if season=='春秋装+薄外套':
+        seasonkey=0
+    if season=='夏装':
+        seasonkey=1
+    if season=='冬装':
+        seasonkey=2
+    if season=='冬装+外套':
+        seasonkey=2
+    result = await ClotheModel.getSeasonClothe(openid,seasonkey)
+    return {
+        'code':1,
+        'data':result,
+        'length':len(result)
+    }
+
+@router.post('/weapp/clothe/getResult')
+async def getResult(
+    openid:str=Form(),
+    value:str=Form(),
+    currentTab:int=Form(),
+    keys:str=Form()
+):
+    keys = keys.split(',')
+    seasonflag = 0
+    colorflag = 0
+    typeflag = 0
+    for key in keys:
+        if key == '春':
+            seasonkey=0
+            seasonflag+=1
+        elif key == '夏':
+            seasonkey=1
+            seasonflag+=1
+        elif key == '秋':
+            seasonkey=0
+            seasonflag+=1
+        elif key == '冬':
+            seasonkey=2
+            seasonflag+=1
+        elif key == '上衣':
+            typekey=0
+            typeflag+=1
+        elif key == '裤子':
+            typekey=1
+            typeflag+=1
+        elif key == '外套':
+            typekey=2
+            typeflag+=1
+        elif key == '裙子':
+            typekey=3
+            typeflag+=1
+        elif key == '鞋子':
+            typekey=4
+            typeflag+=1
+        elif key == '其他':
+            typekey=5
+            typeflag+=1
+        elif key == '黑':
+            colorkey=0
+            colorflag+=1
+        elif key == '白':
+            colorkey=1
+            colorflag+=1
+        elif key == '灰':
+            colorkey=2
+            colorflag+=1
+        elif key == '红':
+            colorkey=3
+            colorflag+=1
+        elif key == '棕':
+            colorkey=4
+            colorflag+=1
+        elif key == '橙':
+            colorkey=5
+            colorflag+=1
+        elif key == '黄':
+            colorkey=6
+            colorflag+=1
+        elif key == '绿':
+            colorkey=7
+            colorflag+=1
+        elif key == '蓝':
+            colorkey=8
+            colorflag+=1
+        elif key == '紫':
+            colorkey=9
+            colorflag+=1
+        if  seasonflag != 1:
+            seasonkey = -1
+        if  colorflag != 1:
+            colorkey = -1
+        if  typeflag != 1:
+            typekey = -1
+    result = await ClotheModel.getResult(
+        openid, value, currentTab, seasonkey, colorkey, typekey
+    )
+    return {
+        'code':1,
+        'data':result,
+        'length':len(result)
+    }

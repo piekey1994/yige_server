@@ -8,6 +8,7 @@ conf/
 *.so
 8087833_*
 note.json
+static/
 openfst_python/
 .vscode/
 # Distribution / packaging
