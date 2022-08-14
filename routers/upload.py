@@ -1,4 +1,4 @@
-from fastapi import APIRouter,File,UploadFile
+from fastapi import APIRouter,File,UploadFile,Form
 from typing import Optional
 from my_config import default_config
 import aiofiles
@@ -46,3 +46,18 @@ async def upload(file:UploadFile):
             }
     
     
+
+@router.post('/weapp/upload/uploadLink')
+async def uploadLink(clotheUrl:str=Form()):
+    begin = clotheUrl.find('https')
+    if begin==-1:
+        return {
+            'code':-1,
+            'error':'请求格式不正确'
+        }
+    end=len(clotheUrl)
+    for i in range(begin,len(clotheUrl)):
+        if clotheUrl[i]==' ':
+            end=i
+            break
+    clotheUrl = clotheUrl[begin:end]

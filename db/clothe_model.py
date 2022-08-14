@@ -195,6 +195,7 @@ class ClotheModel(object):
 
     @classmethod
     async def getResult(cls,openid,value,location,seasonkey,colorkey,typekey):
+        q_values = [openid,location]
         q1 = '''SELECT clothe.clothetype, clothe.location,clothe.clotheid,
         clothe.clotheimg,clothe.clothedetail FROM clothe , clothespress 
         WHERE openid=%s AND clothe.clotheid=clothespress.clotheid 
@@ -202,25 +203,23 @@ class ClotheModel(object):
         q2="1"
         q3="1"
         q4="1"
-        q5=" OR clothe.clothedetail like '%"+value+"%')"
+        q5=" OR clothe.clothedetail like '%%"+value+"%%')"
         if colorkey != -1:
             q2="clothe.clothecolor=%s "
+            q_values.append(colorkey)
         if seasonkey != -1:
             q3="clothe.clotheseason=%s "
+            q_values.append(seasonkey)
         if typekey != -1:
             q4 = "clothe.clothetype=%s "
+            q_values.append(typekey)
         if colorkey==-1 and seasonkey==-1 and typekey==-1:
-            q5=" AND  clothe.clothedetail like '%"+value+"%')"
+            q5=" AND  clothe.clothedetail like '%%"+value+"%%')"
         q = q1+q2+' AND '+q3+' AND '+q4+q5
+        # print(q,(openid,location,colorkey,seasonkey,typekey))
         async with AsyncDB.pool.acquire() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(q,(
-                    openid,
-                    location,
-                    colorkey,
-                    seasonkey,
-                    typekey
-                ))
+                await cur.execute(q,q_values)
                 r = await cur.fetchall()
                 return r
     

@@ -14,7 +14,7 @@ class AnalyzeModel(object):
         '''
         async with AsyncDB.pool.acquire() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(sql,(openid for _ in range(6)))
+                await cur.execute(sql,[openid for _ in range(6)])
                 r = await cur.fetchall()
                 return r
 
@@ -29,7 +29,7 @@ class AnalyzeModel(object):
         '''
         async with AsyncDB.pool.acquire() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(sql,(openid for _ in range(4)))
+                await cur.execute(sql,[openid for _ in range(4)])
                 r = await cur.fetchall()
                 return r
 
@@ -52,6 +52,7 @@ class AnalyzeModel(object):
         '''
         async with AsyncDB.pool.acquire() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(sql,(openid for _ in range(12)))
+                # print(sql,[openid for _ in range(12)])
+                await cur.execute(sql,[openid for _ in range(12)])
                 r = await cur.fetchall()
                 return r

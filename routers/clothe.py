@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 
 router = APIRouter()
-ifashion_pkl:dict = pickle.load(open(default_config['model']['ifashion_path'],'wb'))
+ifashion_pkl:dict = pickle.load(open(default_config['model']['ifashion_path'],'rb'))
 
 @router.post('/weapp/clothe/getMyLike')
 async def getMyLike(openid:str=Form()):
@@ -76,7 +76,7 @@ async def addClothe(openid:str=Form(),url:str=Form(),title:str=Form()):
     color,r,g,b = svm_model.getColorNum()
     cid = await ClotheModel.addclothe(openid, url, title, clothe_type, color, season,r,g,b)
     return {
-        'code':1,
+        'result':1,
         'cid':cid,
         'filepath':filePath
     }
@@ -89,7 +89,7 @@ async def getRecommend(clotheid:str=Form(),filepath:str=Form()):
     await ClotheModel.setHog(clotheid,hog)
     rgb = np.array((clothe['r'],clothe['g'],clothe['b']))
     clothe_type = clothe['clothetype']
-    type_dict:dict = ifashion_pkl['clothe_type']
+    type_dict:dict = ifashion_pkl[clothe_type]
     #取颜色方差小于3000切hog差值小于31的前3个加入数据库
     hogtemp ={}
     for ijk,value_dict in type_dict.items():

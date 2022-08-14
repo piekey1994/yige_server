@@ -61,3 +61,19 @@ async def getWeather(latitude:float=Form(),longitude:float=Form()):
             'high':weatherResult['results'][0]['daily'][0]['high'],
             'city':location
         }
+
+@router.post('/weapp/analyze/getSeasonData')
+async def getSeasonData(openid:str=Form()):
+    season_data = await AnalyzeModel.getSeasonData(openid)
+    return {
+        'code':1,
+        'data':season_data
+    }
+
+@router.post('/weapp/analyze/getColorData')
+async def getColorData(openid:str=Form()):
+    color_data = await AnalyzeModel.getColorData(openid)
+    return {
+        'code':1,
+        'data':color_data
+    }

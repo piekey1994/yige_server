@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from routers import login,analyze,clothe,upload
+from routers import login,analyze,clothe,upload,user,match
 from my_log import logger
 from my_config import default_config
 from db.db import AsyncDB
@@ -11,6 +11,8 @@ app.include_router(login.router)
 app.include_router(analyze.router)
 app.include_router(clothe.router)
 app.include_router(upload.router)
+app.include_router(user.router)
+app.include_router(match.router)
 
 app.mount(path='/static',  # 网页的路径
     app=StaticFiles(directory=default_config['upload']['save_path']),  # 静态文件目录的路径
